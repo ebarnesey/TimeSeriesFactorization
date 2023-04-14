@@ -1,7 +1,7 @@
 ---
-title: 'Supplemental Information: CH3MS-RF'
+title: 'TimeSeriesFactorization'
 author: "Emily Barnes Franklin"
-date: "1/29/2022"
+date: "4/14/2023"
 output:
   html_document: default
   pdf_document: default
@@ -53,6 +53,8 @@ library(CHNOSZ)
 
 library(Metrics)
 library(data.table)
+library(lubridate)
+library(dtwclust)
 ```
 
 ## Custom Functions
@@ -93,28 +95,113 @@ trim.leading <- function (x)  sub("^\\s+", "", x)
 ```
 
 ## Reading In Data Files
-In this section, the necessary data files for analysis are read in. The first of these files is a .csv file containing the names, retention indexes, and mass spectra of all of the external standard (or training dataset) components. The mass spectra are in the form of a semicolon separated string. The second file is a .csv file containing the names, formulae, functional group categories, and vapor pressures of the known training data set. Functional group categories are required to allow the external standard data set to be split into training and test subsets while maintaining a proportional representation of different functional group types between the sets. Note that any properties of interest could be added to this file and substituted into the training and property prediction framework described below. Finally, we provide an example unknown sample .csv for property prediction. The required fields in this file are Name (unique identifier for each unknown compound), retention index, and mass spectrum.  
+
 
 
 
 ```{r Data, warning=FALSE, message = FALSE}
-# First required file: .csv file containing mass spectra, see template file
-# for formatting
-MS_table_o <- read_csv("EBF_GoldsteinGroup_ExternalStandard_GoA2018_ms.csv")
-# Second required file: .csv containing relevant properties of compounds 
-# (both those needed to split training and test datasets and properties
-# that are the intended predicted result)
-Prop_table_o <- read_csv("EBF_GoldsteinGroup_ExternalStandard_GoA2018_properties.csv")
+T_series <- read_csv("ReadFiles/ExampleInputFile.csv")
 
-# Third resuired file: .csv of retenion index and mass spectra of unknown sample \
-#compounds of interest
-Unk_table_o <- read_csv("EBF_GoldsteinGroup_Template_Unknown_Dataset.csv")
+T_series.t <- T_series %>% 
+  mutate(r_DT =    mdy_hm(TimeCode)) %>% 
+  filter(!is.na(Ion1))
+
 
 ```
 
-## Parsing Mass Spectra
+## Hclust
 
- The principle peaks and the mass differences between key peaks are the key indicators of functional groups that exert the greatest influence on the calibration factor of the compound in question.  In this section, the top 10 peaks (by intensity) are identified for each compound.  Then, the top 40 peaks (the 40 peaks which appear in the most compounds from the external standard list) are turned into factors, for which each compound is represented by 0 if the peak is not in the top 10 for that compound or an intensity value between 0 and 1000 if that peak is one of the top 10 peaks for that compound. 
+```{r}
+df.nn <- T_series.t %>% 
+  dplyr::select(-c(TimeCode, r_DT))
+
+# df_list <- as.list(utils::unstack(df_long, amt_ng_ptnorm_smooth ~ Compound.Name))
+
+df_list <- as.list(df.nn)
+
+df_list_z <- dtwclust::zscore(df_list)
+
+set.seed(20)
+cluster_dtw_h <-list()
+for (i in 2:20)
+{
+  cluster_dtw_h[[i]] <- tsclust(df_list_z, type = "h", k = i,  distance = "dtw", control = hierarchical_control(method = "complete"), seed = 590, preproc = NULL, args = tsclust_args(dist = list(window.size = 5L)))
+}
+
+# take a look at the object
+cluster_dtw_h[[8]]
+
+plot(cluster_dtw_h[[8]], type = "sc")
+plot(cluster_dtw_h[[7]], type = "sc")
+plot(cluster_dtw_h[[6]], type = "sc")
+plot(cluster_dtw_h[[5]], type = "sc")
+plot(cluster_dtw_h[[4]], type = "sc")
+plot(cluster_dtw_h[[3]], type = "sc")
+
+final.clust <- cluster_dtw_h[[8]]
+
+plot(final.clust, type = "sc")
+
+1
+cvi(cluster_dtw_h[[2]], type = "valid")
+cvi(cluster_dtw_h[[3]], type = "valid")
+cvi(cluster_dtw_h[[4]], type = "valid")
+cvi(cluster_dtw_h[[5]], type = "valid")
+cvi(cluster_dtw_h[[6]], type = "valid")
+cvi(cluster_dtw_h[[7]], type = "valid")
+cvi(cluster_dtw_h[[8]], type = "valid")
+cvi(cluster_dtw_h[[9]], type = "valid")
+cvi(cluster_dtw_h[[10]], type = "valid")
+
+sil.d <- c(.303, .297, .282, .275, .218, .225, .227)
+sil.i <- c(4, 5, 6, 7, 8, 9, 10)
+sil.plot <- data.frame(n_cluster = sil.i, sil = sil.d)
+
+# NOTE: should have done silhouette max instead of min, should be 7 clusters not 8
+#https://rdrr.io/cran/dtwclust/man/cvi.html
+
+sil.plot.p <- sil.plot %>% 
+  ggplot(aes(x = n_cluster, y = sil))+
+  geom_line()+
+  geom_point()+
+  ylim(.2, .35)+
+  xlab("Number of Clusters")+
+  ylab("Silhouette Index")+
+  theme_bw(base_size = 14)
+
+sil.plot.p
+
+png("silhouette.index.png", width=6, height=5,
+    units="in", res=600, pointsize=12)
+sil.plot.p
+dev.off()
+
+
+
+# from this appears that 7 clusters is ideal, based on maximizing Sil. I screwed this up but recombined the split factors later
+
+cvi.ind <- read_csv("Read_Files/cvi_indicators.csv") %>% 
+  filter(Clusters > 3)
+
+db.plot.p <- cvi.ind %>% 
+  ggplot(aes(x = Clusters, y = Dbstar))+
+  geom_line()+
+  geom_point()+
+  #ylim(.2, .35)+
+  xlab("Number of Clusters")+
+  ylab("Modified Davies-Bouldin Index")+
+  theme_bw(base_size = 14)
+
+db.plot.p
+
+png("dbstar.index.png", width=6, height=5,
+    units="in", res=600, pointsize=12)
+db.plot.p
+dev.off()
+
+
+```
+ 
 
 
 ```{r MS_peak_parse, warning=FALSE}
