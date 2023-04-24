@@ -143,7 +143,7 @@ final.clust <- cluster_dtw_h[[8]]
 plot(final.clust, type = "sc")
 
 1
-cvi(cluster_dtw_h[[2]], type = "valid")
+cvi.2 <- t(data.frame(cvi(cluster_dtw_h[[2]], type = "valid")))
 cvi(cluster_dtw_h[[3]], type = "valid")
 cvi(cluster_dtw_h[[4]], type = "valid")
 cvi(cluster_dtw_h[[5]], type = "valid")
