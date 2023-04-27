@@ -102,20 +102,98 @@ trim.leading <- function (x)  sub("^\\s+", "", x)
 ```{r Data, warning=FALSE, message = FALSE}
 T_series <- read_csv("ReadFiles/AMYS_input_file.csv")
 
+id.csv <- read_csv("ReadFiles/identity.csv")
+
+id.csv.t <- data.frame(t(id.csv)) %>% 
+  row_to_names(row_number = 1) %>% 
+  clean_names() 
+
+id.csv.tidyname <- data.frame(t(id.csv.t)) %>% 
+  rownames_to_column() %>% 
+  rename(Ion = rowname)
+
+
+
+id.csv.i1 <- id.csv %>% 
+  rename(Ion1 = ion) %>% 
+  rename(I1.formula = formula) %>% 
+  rename(I1.tentative.id.1 = tentative.id.1) %>% 
+  rename(I1.tentative.id.2 = tentative.id.2) %>% 
+  rename(I1.tentative.id.3 = tentative.id.3)
+
+id.csv.i2 <- id.csv %>% 
+  rename(Ion2 = ion) %>% 
+  rename(I2.formula = formula) %>% 
+  rename(I2.tentative.id.1 = tentative.id.1) %>% 
+  rename(I2.tentative.id.2 = tentative.id.2) %>% 
+  rename(I2.tentative.id.3 = tentative.id.3)
+
 T_series.t <- T_series %>% 
   mutate(r_DT =    dmy_hm(T.code)) %>% 
   dplyr::select(-T.code) %>% 
   filter(!is.na("x31_0143"))
 
+T_series.t.long <- T_series.t %>% 
+  gather("Ion", "counts", -r_DT)
+  
+
+T_series.t.trans <- data.frame(t(T_series.t)) %>% 
+  mutate(i = row_number()) %>% 
+  dplyr::select(i) %>% 
+  rownames_to_column()
+
+T_series.t.trans.i1 <- T_series.t.trans %>% 
+  rename(Ion1 = rowname)
+
+T_series.t.trans.i2 <- T_series.t.trans %>% 
+  rename(Ion2 = rowname)
+
 T_series.c <- clean_names(T_series.t) 
 
-  
+T_series.c.long <- T_series.c %>% 
+  gather("Ion", "counts", -r_dt)
 
 
 ```
 
-## Hclust
+## correlation matrix
 
+Here you set a number which is considered suspect, eg all compounds with a positive correlation coefficient higher than this number will be flagged.
+
+```{r}
+r2_cutoff <- .95 # this number is adjustable and corresponds to the r2 above which compounds will be flagged for a positive correlation
+
+T_series.nt <- T_series.c %>% 
+  dplyr::select(-c(r_dt))
+
+Tseries.cor <- data.frame(cor(T_series.nt))
+
+write.csv(Tseries.cor, "WriteFiles/CorMatrix.csv")
+
+HighCorrSuspects <- data.frame(which((Tseries.cor > .95)))
+
+HC <- Tseries.cor
+
+HC[(HC > sqrt(r2_cutoff))] <- NA
+
+
+HC.i <- data.frame(which(is.na(HC), arr.ind = TRUE)) %>% 
+  filter(row > col) %>% 
+  left_join(T_series.t.trans.i1, by= c("row" = "i") ) %>% 
+  left_join(T_series.t.trans.i2, by= c("col" = "i") ) 
+
+HC.i.c <- HC.i %>% 
+  dplyr::select(-c("row", "col")) %>% 
+  mutate(Ion1 = as.numeric(Ion1)) %>% 
+  mutate(Ion2 = as.numeric (Ion2)) %>% 
+  left_join(id.csv.i1) %>% 
+  left_join(id.csv.i2)
+
+write.csv(HC.i.c, "WriteFiles/Highly_Correlated_Ions.csv")
+
+```
+
+## Hclust
 ```{r}
 df.nn <- T_series.c %>% 
   dplyr::select(-c(r_dt))
@@ -137,7 +215,19 @@ for (i in 2:20)
 {
   cluster_dtw_h[[i]] <- tsclust(df_list_z, type = "h", k = i,  distance = "dtw", control = hierarchical_control(method = "complete"), seed = 590, preproc = NULL, args = tsclust_args(dist = list(window.size = 5L)))
 }
+```
 
+
+```{r}
+cluster_dtw_h2 <-list()
+for (i in 2:20)
+{
+  cluster_dtw_h2[[i]] <- tsclust(df_list_z, type = "h", k = i,  distance = "dtw", control = hierarchical_control(method = "complete"), seed = 590, preproc = NULL, args = tsclust_args(dist = list(window.size = 5L)))
+}
+```
+
+
+```{r}
 # take a look at the object
 cluster_dtw_h[[8]]
 
@@ -148,9 +238,7 @@ plot(cluster_dtw_h[[5]], type = "sc")
 plot(cluster_dtw_h[[4]], type = "sc")
 plot(cluster_dtw_h[[3]], type = "sc")
 
-final.clust <- cluster_dtw_h[[8]]
 
-plot(final.clust, type = "sc")
 ```
 
 
@@ -225,15 +313,160 @@ cvi.all %>%
 ```
 
 https://rstudio-pubs-static.s3.amazonaws.com/474160_0761428e8683401e941a92a4177254a4.html
+
+
+Pick number of clusters based on all indicators- here choosing 5 because of local minimum in silhouette, and because the groupings are still meaningful (more than one compound in each group)
 ```{r}
-cvi(cluster_dtw_h[[3]], type = "valid")
-cvi(cluster_dtw_h[[4]], type = "valid")
-cvi(cluster_dtw_h[[5]], type = "valid")
-cvi(cluster_dtw_h[[6]], type = "valid")
-cvi(cluster_dtw_h[[7]], type = "valid")
-cvi(cluster_dtw_h[[8]], type = "valid")
-cvi(cluster_dtw_h[[9]], type = "valid")
-cvi(cluster_dtw_h[[10]], type = "valid")
+
+final.clust <- cluster_dtw_h[[5]]
+
+
+plot(final.clust, type = "sc")
+
+
+```
+
+
+```{r}
+fit <- cluster_dtw_h[[5]]
+clustered_data <- cutree(fit, k=5)
+clustered_data_tidy <- as.data.frame(as.table(clustered_data)) %>% glimpse()
+colnames(clustered_data_tidy) <- c("Ion","cluster")
+clustered_data_tidy$Ion <- as.character(clustered_data_tidy$Ion)
+glimpse(clustered_data_tidy)
+table(clustered_data_tidy$cluster)
+```
+
+
+```{r}
+cluster_exploration <- clustered_data_tidy %>% 
+  left_join(id.csv.tidyname)
+
+write.csv(cluster_exploration, "WriteFiles/cluster_exploration.csv")
+```
+looking at diurnal variability
+```{r}
+
+
+
+```
+
+
+```{r}
+# clustered_data_tidy <- clustered_data_tidy %>% 
+#   mutate(Compound.Name = sub('.', '', Compound.Name))
+
+d.zscoreparams <- T_series.c.long %>% 
+  group_by(Ion) %>% 
+  summarise(c.mean = mean(counts), c.stdev = sd(counts))
+
+T_series.c.long.zscore <- T_series.c.long %>% 
+  left_join(d.zscoreparams) %>% 
+  mutate(counts.zscore = (counts-c.mean)/c.stdev)
+```
+
+
+```{r}
+T_series.c.long.zscore.diurnal <- T_series.c.long.zscore %>% 
+  mutate(t.hr = hour(r_dt)) %>% 
+  left_join(clustered_data_tidy) %>% 
+  group_by(cluster, t.hr) %>% 
+  summarise(mean.zcounts = mean(counts.zscore), 
+            sd.zcounts = sd(counts.zscore), 
+            med.zcounts = median(counts.zscore)) %>% 
+  mutate(cluster.f = as.factor(cluster)) %>% 
+  mutate(mean_med_zcounts = mean.zcounts/med.zcounts) %>% 
+  mutate(mean_med_zcounts.2 = (mean.zcounts*mean.zcounts)
+         /med.zcounts)
+
+T_series.c.long.zscore.diurnal %>% 
+  ggplot(aes(x = t.hr, y = mean.zcounts, color = cluster.f)) +
+  geom_line()+
+  geom_errorbar(aes(ymin=mean.zcounts-sd.zcounts, 
+                    ymax=mean.zcounts+sd.zcounts), width=.2,
+                 position=position_dodge(.9)) +
+  facet_wrap(~cluster.f)+
+  theme_bw()+
+  xlab("Hour")+
+  ylab("Average Z-Scored Counts")
+
+T_series.c.long.zscore.diurnal %>% 
+  ggplot(aes(x = t.hr, y = mean.zcounts, color = cluster.f)) +
+  geom_line()+
+  geom_errorbar(aes(ymin=mean.zcounts-sd.zcounts, 
+                    ymax=mean.zcounts+sd.zcounts), width=.2,
+                 position=position_dodge(.9))+
+  xlab("Hour")+
+  ylab("Average Z-Scored Counts")
+
+T_series.c.long.zscore.diurnal %>% 
+  ggplot(aes(x = t.hr, y = mean.zcounts, color = cluster.f)) +
+  geom_line(size = 2)+
+  theme_bw()+
+  ylim(-.65, .65)+
+  xlab("Hour")+
+  ylab("Average Z-Scored Counts")
+
+T_series.c.long.zscore.diurnal %>% 
+  ggplot(aes(x = t.hr, y = med.zcounts, color = cluster.f)) +
+  geom_line(size = 2)+
+  theme_bw()+
+  ylim(-.65, .65)+
+  xlab("Hour")+
+  ylab("Median Z-Scored Counts")
+
+T_series.c.long.zscore.diurnal %>% 
+  ggplot(aes(x = t.hr, y = mean_med_zcounts, color = cluster.f)) +
+  geom_line(size = 2)+
+  theme_bw()+
+  xlab("Hour")+
+  ylab("Mean:Median Ratio\nPerturbation Indicator")
+
+T_series.c.long.zscore.diurnal %>% 
+  ggplot(aes(x = t.hr, y = mean_med_zcounts.2, color = cluster.f)) +
+  geom_line(size = 2)+
+  theme_bw()+
+  xlab("Hour")+
+  ylab("Mean:Median Ratio\nPerturbation Indicator")
+
+T_series.c.long.zscore.diurnal %>% 
+  ggplot(aes(x = t.hr, y = sd.zcounts, color = cluster.f)) +
+  geom_line(size = 2)+
+  theme_bw()+
+  xlab("Hour")+
+  ylab("Standard Deviation of Counts")
+
+
+
+```
+
+
+
+```{r}
+h.clust.factors.z <- read_csv("Read_Files/Cluster_labels.2.csv") %>% 
+  mutate(cluster_factor_types.f = fct_reorder(cluster_factor_types, order))
+
+cluster_vis <- M_t_analyte_withIS_smoothed.zscore %>% 
+  left_join(clustered_data_tidy) %>% 
+  filter(!is.na(cluster)) %>% 
+  left_join(h.clust.factors.z) 
+
+cluster_vis.p <- cluster_vis %>% 
+  ggplot(aes(x = r_date, y = amt_ng_ptnorm_smooth.zscore, color = Compound.Name))+
+  geom_line(show.legend = FALSE)+
+  facet_wrap(~ cluster_factor_types.f)+
+  theme_bw(base_size = 12)+
+  ylab("Concentration (Z-Scored)")+
+  xlab("")
+
+cluster_vis.p
+  
+  
+png("clustervis2.png", width=8, height=6,
+    units="in", res=600, pointsize=12)
+cluster_vis.p
+dev.off()
+
 ```
 
 

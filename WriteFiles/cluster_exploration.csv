@@ -1,0 +1,100 @@
+"","Ion","cluster","formula","tentative.id.1","tentative.id.2","tentative.id.3"
+"1","x31_0143",1,"CH2O","formaldehyde",NA,NA
+"2","x33_0279",1,"CH4O","methanol",NA,NA
+"3","x41_0311",2,"C3H4","propyne","fragments",NA
+"4","x42_0018",3,NA,"unknown",NA,NA
+"5","x42_0269",3,"C2H3N","acetonitrile",NA,NA
+"6","x43_0113",1,"C2H2O","ketene",NA,NA
+"7","x43_0466",1,"C3H6","propene",NA,NA
+"8","x44_0074",3,"CHNO","isocyanic acid",NA,NA
+"9","x44_048",1,NA,NA,NA,NA
+"10","x44_9901",4,"CHP","methinophosphide",NA,NA
+"11","x45_0267",3,"C2H4O","acetaldehyde",NA,NA
+"12","x46_0234",3,"CH3NO","mthanamid",NA,NA
+"13","x47_008",3,NA,NA,NA,NA
+"14","x47_0436",1,"C2H6O","ethanol",NA,NA
+"15","x48_0483",1,"CH5NO","Methoxyamine",NA,NA
+"16","x49_0094",1,"CH4S","Methanethiol","Methanetriol",NA
+"17","x49_9987",4,"CH7NO","Ammonia methanol",NA,NA
+"18","x51_0211",3,NA,"unknown",NA,NA
+"19","x51_0426",1,"CH3O-H2O","Methanol water cluster",NA,NA
+"20","x51_9403",3,NA,"unknown",NA,NA
+"21","x51_995",3,NA,NA,NA,NA
+"22","x52_0309",4,NA,"unknown",NA,NA
+"23","x52_9408",3,NA,"unknown",NA,NA
+"24","x53_0026",2,"C2N2","Cyanogen",NA,NA
+"25","x53_0389",1,"C4H4","Cyclobutadiene",NA,NA
+"26","x53_9398",3,NA,"unknown",NA,NA
+"27","x54_0354",3,"C3H3N","Acrylonitrile",NA,NA
+"28","x55_9351",3,NA,"unknown",NA,NA
+"29","x56_0616",2,"C4H7","But-1-yne","2-Methylallyl radical",NA
+"30","x57_0368",1,"C3H4O","Acrolein","fragments",NA
+"31","x57_0702",2,"C4H8","1-Butene","2-Methylpropene","fragments"
+"32","x57_9355",5,NA,"unknown",NA,NA
+"33","x58_0351",2,"C2H3NO","Hydroxyacetonitrile","Isocyanato methane",NA
+"34","x58_0732",2,"C3H7N","2-Propanimine","2-Propen-1-amine",NA
+"35","x59_0502",1,"C3H6O","Acetone","Propanal",NA
+"36","x59_931",5,NA,NA,NA,NA
+"37","x59_9659",5,NA,"unknown",NA,NA
+"38","x60_0487",1,"C2H5NO","Acetamide","N-methyl-formamide",NA
+"39","x61_029",3,NA,NA,NA,NA
+"40","x61_9285",3,"CClN","Cyanogen chloride",NA,NA
+"41","x62_0266",1,"CH3NO2","Methyl nitrite","Nitromethane",NA
+"42","x62_9299",3,NA,"unknown",NA,NA
+"43","x62_9637",3,"CH2OS","Sulfine",NA,NA
+"44","x63_003",3,NA,NA,NA,NA
+"45","x63_0395",3,"C2H7P","Dimethylphosphine",NA,NA
+"46","x63_9807",4,"HNOS","Thionitrous acid","Thionylimide",NA
+"47","x64_039",3,NA,NA,NA,NA
+"48","x65_0236",3,"C2H2F2","1,1-Difluoroethylene",NA,NA
+"49","x65_0586",1,"C2H8O2","Ethylene dihydrate",NA,NA
+"50","x66_0429",1,"C4H3N","Cyanoallene",NA,NA
+"51","x66_0549",1,"C5H5","Cyclopentadienyl radical",NA,NA
+"52","x67_0546",1,"C5H6","3-Penten-1-yne","1,3-Cyclopentadiene","frag"
+"53","x68_0521",1,"C4H5N","pyrrole","3-Butenenitrile","Cyclopropanecarbonitrile"
+"54","x69_0363",1,"C4H4O","Furan",NA,NA
+"55","x69_0701",1,"C5H8","Isoprene","1,4-Pentadiene",NA
+"56","x70_0701",1,"C4H7N","Butanenitrile","1-Isocyano-propane",NA
+"57","x71_05",1,NA,NA,NA,NA
+"58","x71_0839",3,"C5H10","(Z)-2-pentene","2-Methyl-2-butene",NA
+"59","x71_933",3,NA,NA,NA,NA
+"60","x72_049",1,NA,NA,NA,NA
+"61","x72_0863",3,"C4H9N","1-Methyl-azetidine","2-Methyl-2-propen-1-amine",NA
+"62","x72_9381",3,NA,"unknown",NA,NA
+"63","x73_0648",1,"C4H8O","2-Butanone","Butanal",NA
+"64","x73_9425",3,NA,"unknown",NA,NA
+"65","x74_0255",3,"C2H3NO2","Nitroethane",NA,NA
+"66","x74_0638",3,"C3H7NO","Dimethylformamide",NA,NA
+"67","x75_0447",3,"C3H6O2","Methyl acetate","1-Hydroxypropan-2-one",NA
+"68","x75_9465",4,NA,"unknown",NA,NA
+"69","x76_0468",3,"C2H5NO2","Nitroethane","Acetohydroxamic acid",NA
+"70","x76_9445",3,"CS2","Carbon disulfide",NA,NA
+"71","x77_0593",1,"C3H8O2","1,3-Propanediol","2-Methoxy-ethanol",NA
+"72","x77_942",4,NA,NA,NA,NA
+"73","x78_0469",1,"C6H5","2,4-Hexadiyn-1-yl","1,5-Hexadiyn-3-yl",NA
+"74","x79_0538",3,"C6H6","benzene",NA,NA
+"75","x79_9397",3,NA,"unknown",NA,NA
+"76","x80_0548",3,"C5H5N","Pyridine",NA,NA
+"77","x80_9916",4,"C2H2FCl","1-Chloro-1-fluoro-ethene",NA,NA
+"78","x81_0702",1,"C6H8","1-Hexen-3-yne","fragments",NA
+"79","x82_0713",1,"C6H9","Cyclopentenyl carbenium",NA,NA
+"80","x82_9456",4,NA,"unknown",NA,NA
+"81","x82_9889",4,"H3O3P","Phosphorous acid",NA,NA
+"82","x83_0545",1,"C5H6O","2-Methylfuran","fragment",NA
+"83","x83_0845",1,"C6H10","2-Hexyne","1-Methyl-cyclopentane",NA
+"84","x84_0501",1,"C3H5N3","3-Aminopyrazole","4-NH2-pyrazole",NA
+"85","x84_084",1,NA,NA,NA,NA
+"86","x84_9621",4,"CH2Cl2","Methylene chloride",NA,NA
+"87","x85_0334",1,"C4H4O2","2(3H)-Furanone",NA,NA
+"88","x85_063",1,NA,NA,NA,NA
+"89","x85_0981",3,"C6H12","Methylcyclopentane","(E)-2-Hexene",NA
+"90","x85_9488",3,NA,"unknown",NA,NA
+"91","x86_0611",3,"C4H7NO","2-Butenamide","Methacrylamide",NA
+"92","x87_0464",1,"C4H6O2","2,3-Butanedione","Methyl Acrylate",NA
+"93","x87_9451",3,NA,"unknown",NA,NA
+"94","x88_05",1,NA,NA,NA,NA
+"95","x88_0714",1,"C4H9NO","N-Ethyl-acetamide","Morpholine",NA
+"96","x88_9537",3,NA,"unknown",NA,NA
+"97","x89_0594",3,"C4H8O2","Ethyl acetate","1,4-Dioxane",NA
+"98","x89_9469",3,NA,"unknown",NA,NA
+"99","x90_0236",3,"C2H3NO3","Oxamic acid",NA,NA
